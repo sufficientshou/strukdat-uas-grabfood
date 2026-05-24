@@ -1,0 +1,8 @@
+prd.md
+*.exe
+*.obj
+*.o
+.vscode/
+.vs/
+Debug/
+Release/
