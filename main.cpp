@@ -84,24 +84,139 @@ void tampilkanMenuRestoran(int indeks) {
     }
 }
 
-int main() {
-    isiDataRestoran();
-    
+void tampilkanMenuUtama() {
     cout << "=== SIMULASI GRABFOOD ===" << endl;
     cout << "Selamat datang di aplikasi pemesanan makanan!" << endl;
     cout << endl;
-    
-    tampilkanDaftarRestoran();
-    
-    cout << "Pilih restoran (1-" << jumlahRestoran << "): ";
+    cout << "1. Pelanggan" << endl;
+    cout << "2. Mitra Restoran" << endl;
+    cout << "3. Log Driver" << endl;
+    cout << "4. Keluar" << endl;
+    cout << endl;
+    cout << "Pilih menu: ";
+}
+
+void menuPelanggan() {
     int pilihan;
-    cin >> pilihan;
     
-    if(pilihan >= 1 && pilihan <= jumlahRestoran) {
+    while(true) {
         system("cls");
-        tampilkanMenuRestoran(pilihan - 1);
-    } else {
-        cout << "Pilihan tidak valid!" << endl;
+        cout << "=== MENU PELANGGAN ===" << endl;
+        cout << "1. Lihat Daftar Restoran" << endl;
+        cout << "2. Cari Restoran" << endl;
+        cout << "3. Keranjang Belanja" << endl;
+        cout << "4. Kembali ke Menu Utama" << endl;
+        cout << endl;
+        cout << "Pilih menu: ";
+        cin >> pilihan;
+        
+        switch(pilihan) {
+            case 1:
+                system("cls");
+                tampilkanDaftarRestoran();
+                cout << "Pilih restoran (1-" << jumlahRestoran << "): ";
+                int pilihanRestoran;
+                cin >> pilihanRestoran;
+                
+                if(pilihanRestoran >= 1 && pilihanRestoran <= jumlahRestoran) {
+                    system("cls");
+                    tampilkanMenuRestoran(pilihanRestoran - 1);
+                    cout << endl;
+                    cout << "Tekan Enter untuk kembali...";
+                    cin.ignore();
+                    cin.get();
+                } else {
+                    cout << "Pilihan tidak valid, coba lagi!" << endl;
+                    cout << "Tekan Enter untuk kembali...";
+                    cin.ignore();
+                    cin.get();
+                }
+                break;
+                
+            case 2:
+                system("cls");
+                cout << "=== CARI RESTORAN ===" << endl;
+                cout << "Fitur pencarian akan segera hadir!" << endl;
+                cout << "Tekan Enter untuk kembali...";
+                cin.ignore();
+                cin.get();
+                break;
+                
+            case 3:
+                system("cls");
+                cout << "=== KERANJANG BELANJA ===" << endl;
+                cout << "Keranjang masih kosong!" << endl;
+                cout << "Tekan Enter untuk kembali...";
+                cin.ignore();
+                cin.get();
+                break;
+                
+            case 4:
+                return;
+                
+            default:
+                cout << "Pilihan tidak valid, coba lagi!" << endl;
+                cout << "Tekan Enter untuk kembali...";
+                cin.ignore();
+                cin.get();
+                break;
+        }
+    }
+}
+
+void menuMitraRestoran() {
+    system("cls");
+    cout << "=== MENU MITRA RESTORAN ===" << endl;
+    cout << "Fitur mitra restoran akan segera hadir!" << endl;
+    cout << "Tekan Enter untuk kembali...";
+    cin.ignore();
+    cin.get();
+}
+
+void menuLogDriver() {
+    system("cls");
+    cout << "=== LOG DRIVER ===" << endl;
+    cout << "Belum ada pesanan yang perlu diantar!" << endl;
+    cout << "Tekan Enter untuk kembali...";
+    cin.ignore();
+    cin.get();
+}
+
+int main() {
+    isiDataRestoran();
+    int pilihan;
+    
+    while(true) {
+        system("cls");
+        tampilkanMenuUtama();
+        cin >> pilihan;
+        
+        switch(pilihan) {
+            case 1:
+                menuPelanggan();
+                break;
+                
+            case 2:
+                menuMitraRestoran();
+                break;
+                
+            case 3:
+                menuLogDriver();
+                break;
+                
+            case 4:
+                system("cls");
+                cout << "Terima kasih telah menggunakan GrabFood!" << endl;
+                cout << "Program selesai." << endl;
+                return 0;
+                
+            default:
+                cout << "Pilihan tidak valid, coba lagi!" << endl;
+                cout << "Tekan Enter untuk kembali...";
+                cin.ignore();
+                cin.get();
+                break;
+        }
     }
     
     return 0;
