@@ -33,12 +33,22 @@ struct Pesanan {
     int totalHarga;
     string status;
     int nomorPesanan;
+    string waktuPesan;
 };
 
 struct NodeAntrean {
     Pesanan pesanan;
     NodeAntrean* next;
 };
+
+struct PesananSelesai {
+    Pesanan pesanan;
+    string waktuSelesai;
+    string statusPengiriman;
+};
+
+PesananSelesai riwayatPesanan[100];
+int jumlahRiwayat = 0;
 
 Restoran daftarRestoran[5];
 int jumlahRestoran = 0;
@@ -47,6 +57,10 @@ NodeKeranjang* ekorDaftarKeranjang = nullptr;
 NodeAntrean* depanAntrean = nullptr;
 NodeAntrean* belakangAntrean = nullptr;
 int nomorPesananTerakhir = 0;
+
+string dapatkanWaktuSekarang() {
+    return "12:30";
+}
 
 void isiDataRestoran() {
     daftarRestoran[0].nama = "Warung Padang Yapyap";
@@ -192,6 +206,15 @@ void hapusDariKeranjang(int urutan) {
     delete current;
 }
 
+void hapusSemuaKeranjang() {
+    while(kepalaDaftarKeranjang != nullptr) {
+        NodeKeranjang* temp = kepalaDaftarKeranjang;
+        kepalaDaftarKeranjang = kepalaDaftarKeranjang->next;
+        delete temp;
+    }
+    ekorDaftarKeranjang = nullptr;
+}
+
 void masukkanKeAntreanDapur(string namaPelanggan) {
     if(kepalaDaftarKeranjang == nullptr) {
         cout << "Keranjang kosong, tidak bisa checkout!" << endl;
@@ -204,6 +227,7 @@ void masukkanKeAntreanDapur(string namaPelanggan) {
     pesananBaru->pesanan.status = "Sedang Dimasak";
     pesananBaru->pesanan.totalHarga = 0;
     pesananBaru->pesanan.daftarMakanan = "";
+    pesananBaru->pesanan.waktuPesan = dapatkanWaktuSekarang();
     pesananBaru->next = nullptr;
     
     NodeKeranjang* current = kepalaDaftarKeranjang;
@@ -238,15 +262,6 @@ void masukkanKeAntreanDapur(string namaPelanggan) {
     cout << "Restoran: " << pesananBaru->pesanan.namaRestoran << endl;
 }
 
-void hapusSemuaKeranjang() {
-    while(kepalaDaftarKeranjang != nullptr) {
-        NodeKeranjang* temp = kepalaDaftarKeranjang;
-        kepalaDaftarKeranjang = kepalaDaftarKeranjang->next;
-        delete temp;
-    }
-    ekorDaftarKeranjang = nullptr;
-}
-
 void selesaikanPesananPertama() {
     if(depanAntrean == nullptr) {
         cout << "Tidak ada pesanan dalam antrean!" << endl;
@@ -254,6 +269,14 @@ void selesaikanPesananPertama() {
     }
     
     NodeAntrean* pesananSelesai = depanAntrean;
+    
+    if(jumlahRiwayat < 100) {
+        riwayatPesanan[jumlahRiwayat].pesanan = pesananSelesai->pesanan;
+        riwayatPesanan[jumlahRiwayat].waktuSelesai = dapatkanWaktuSekarang();
+        riwayatPesanan[jumlahRiwayat].statusPengiriman = "Siap Diantar";
+        jumlahRiwayat++;
+    }
+    
     depanAntrean = depanAntrean->next;
     
     if(depanAntrean == nullptr) {
@@ -262,8 +285,10 @@ void selesaikanPesananPertama() {
     
     cout << "Pesanan #" << pesananSelesai->pesanan.nomorPesanan;
     cout << " (" << pesananSelesai->pesanan.namaPelanggan << ") telah selesai!" << endl;
+    cout << "Pesanan dipindahkan ke log driver untuk pengiriman." << endl;
     
     delete pesananSelesai;
+    pesananSelesai = nullptr;
 }
 
 void tampilkanAntreanDapur() {
@@ -283,11 +308,64 @@ void tampilkanAntreanDapur() {
         cout << "   Makanan: " << current->pesanan.daftarMakanan << endl;
         cout << "   Total: Rp " << current->pesanan.totalHarga << endl;
         cout << "   Status: " << current->pesanan.status << endl;
+        cout << "   Waktu Pesan: " << current->pesanan.waktuPesan << endl;
         cout << endl;
         
         current = current->next;
         urutan++;
     }
+}
+
+void tampilkanLogDriver() {
+    cout << "=== LOG DRIVER - PESANAN SIAP DIANTAR ===" << endl;
+    
+    if(jumlahRiwayat == 0) {
+        cout << "Belum ada pesanan yang siap diantar!" << endl;
+        return;
+    }
+    
+    for(int i = 0; i < jumlahRiwayat; i++) {
+        cout << i+1 << ". Pesanan #" << riwayatPesanan[i].pesanan.nomorPesanan << endl;
+        cout << "   Pelanggan: " << riwayatPesanan[i].pesanan.namaPelanggan << endl;
+        cout << "   Restoran: " << riwayatPesanan[i].pesanan.namaRestoran << endl;
+        cout << "   Makanan: " << riwayatPesanan[i].pesanan.daftarMakanan << endl;
+        cout << "   Total: Rp " << riwayatPesanan[i].pesanan.totalHarga << endl;
+        cout << "   Waktu Pesan: " << riwayatPesanan[i].pesanan.waktuPesan << endl;
+        cout << "   Waktu Selesai: " << riwayatPesanan[i].waktuSelesai << endl;
+        cout << "   Status: " << riwayatPesanan[i].statusPengiriman << endl;
+        cout << endl;
+    }
+}
+
+void tandaiPesananTerkirim(int nomorPesanan) {
+    for(int i = 0; i < jumlahRiwayat; i++) {
+        if(riwayatPesanan[i].pesanan.nomorPesanan == nomorPesanan) {
+            riwayatPesanan[i].statusPengiriman = "Terkirim";
+            cout << "Pesanan #" << nomorPesanan << " berhasil ditandai sebagai terkirim!" << endl;
+            return;
+        }
+    }
+    cout << "Pesanan tidak ditemukan!" << endl;
+}
+
+void bersihkanMemoriSemua() {
+    while(kepalaDaftarKeranjang != nullptr) {
+        NodeKeranjang* temp = kepalaDaftarKeranjang;
+        kepalaDaftarKeranjang = kepalaDaftarKeranjang->next;
+        delete temp;
+        temp = nullptr;
+    }
+    ekorDaftarKeranjang = nullptr;
+    
+    while(depanAntrean != nullptr) {
+        NodeAntrean* temp = depanAntrean;
+        depanAntrean = depanAntrean->next;
+        delete temp;
+        temp = nullptr;
+    }
+    belakangAntrean = nullptr;
+    
+    cout << "Semua memori telah dibersihkan!" << endl;
 }
 
 void tampilkanKeranjang() {
@@ -315,6 +393,8 @@ void tampilkanKeranjang() {
     
     cout << endl;
     cout << "Total: Rp " << totalHarga << endl;
+}
+
 void tampilkanMenuRestoran(int indeks) {
     if(indeks < 0 || indeks >= jumlahRestoran) {
         cout << "Restoran tidak ditemukan!" << endl;
@@ -442,7 +522,7 @@ void menuPelanggan() {
                         cin.get();
                         break;
                         
-                    case 3:
+                    case 3: {
                         system("cls");
                         cout << "Masukkan nama restoran yang dicari: ";
                         string kataCari;
@@ -461,6 +541,7 @@ void menuPelanggan() {
                         cout << "Tekan Enter untuk kembali...";
                         cin.get();
                         break;
+                    }
                         
                     case 4:
                         break;
@@ -500,7 +581,7 @@ void menuPelanggan() {
                             cin.get();
                             break;
                             
-                        case 2:
+                        case 2: {
                             cout << "Masukkan nama pelanggan: ";
                             string namaPelanggan;
                             cin.ignore();
@@ -510,6 +591,7 @@ void menuPelanggan() {
                             cout << "Tekan Enter untuk kembali...";
                             cin.get();
                             break;
+                        }
                             
                         case 3:
                             break;
@@ -585,21 +667,52 @@ void menuMitraRestoran() {
 }
 
 void menuLogDriver() {
-    system("cls");
-    cout << "=== LOG DRIVER ===" << endl;
+    int pilihan;
     
-    if(depanAntrean == nullptr) {
-        cout << "Belum ada pesanan yang perlu diantar!" << endl;
-    } else {
-        cout << "Pesanan yang siap untuk diantar:" << endl;
-        cout << "Silakan cek dengan mitra restoran untuk pesanan yang sudah selesai." << endl;
+    while(true) {
+        system("cls");
+        cout << "=== MENU LOG DRIVER ===" << endl;
+        cout << "1. Lihat Pesanan Siap Diantar" << endl;
+        cout << "2. Tandai Pesanan Terkirim" << endl;
+        cout << "3. Kembali ke Menu Utama" << endl;
         cout << endl;
-        tampilkanAntreanDapur();
+        cout << "Pilih menu: ";
+        cin >> pilihan;
+        
+        switch(pilihan) {
+            case 1:
+                system("cls");
+                tampilkanLogDriver();
+                cout << "Tekan Enter untuk kembali...";
+                cin.ignore();
+                cin.get();
+                break;
+                
+            case 2:
+                system("cls");
+                tampilkanLogDriver();
+                if(jumlahRiwayat > 0) {
+                    cout << "Masukkan nomor pesanan yang sudah terkirim: ";
+                    int nomorPesanan;
+                    cin >> nomorPesanan;
+                    tandaiPesananTerkirim(nomorPesanan);
+                }
+                cout << "Tekan Enter untuk kembali...";
+                cin.ignore();
+                cin.get();
+                break;
+                
+            case 3:
+                return;
+                
+            default:
+                cout << "Pilihan tidak valid, coba lagi!" << endl;
+                cout << "Tekan Enter untuk kembali...";
+                cin.ignore();
+                cin.get();
+                break;
+        }
     }
-    
-    cout << "Tekan Enter untuk kembali...";
-    cin.ignore();
-    cin.get();
 }
 
 int main() {
@@ -627,6 +740,8 @@ int main() {
             case 4:
                 system("cls");
                 cout << "Terima kasih telah menggunakan GrabFood!" << endl;
+                cout << "Membersihkan memori..." << endl;
+                bersihkanMemoriSemua();
                 cout << "Program selesai." << endl;
                 return 0;
                 
